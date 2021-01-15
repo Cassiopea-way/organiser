@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Это заголовок тайтл</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0"> 
+	</head>
+	<style>
+	   table {border:1px solid black;
+	          }
+	   td {border:1px solid black;
+	       width:20px;
+		   height:20px;
+		   text-align:center;}
+	   th {border:1px solid black;
+	       width:20px;
+		   height:20px;
+		   text-align:center;}
+	
+	   #content {position:relative;
+	             margin: 0px auto;
+				 border:1px solid red;
+				 width:1000px;
+				 height:300px;}
+	   #tasklist {width:200px;
+	              height:180px;
+				  border:1px solid blue;
+				  position:absolute;
+				  left:550px;
+				  top:62px;}
+	   #tasklisttext {position:absolute;
+	                 left:600px;
+			         top:10px;}			  
+	   #tasklistday {position:absolute;
+	                 left:560px;
+			         top:35px;
+					 color:blue;
+					 font-weight:bold;}
+       #tasklistmonth {position:absolute;
+	                   left:620px;
+			           top:35px;
+					   color:blue;
+					   font-weight:bold;}
+       #tasklistyear {position:absolute;
+	                 left:710px;
+			         top:35px;
+					 color:blue;
+					 font-weight:bold;}	   
+	   #changeday {position:absolute;
+	           left:300px;
+			   top:60px;}
+	   #changemonth {position:absolute;
+	           left:340px;
+			   top:20px;}
+	   #changeyear {position:absolute;
+	           left:420px;
+			   top:20px;}
+	   #left {position:absolute;
+	           left:330px;
+			   top:250px;
+			   width:21px;
+			   height:21px;}
+	   #right {position:absolute;
+	           left:440px;
+			   top:250px;
+			   width:21px;
+			   height:21px;}
+	   .done {
+		  text-decoration:line-through;
+		  text-decoration-color:red;
+		  color:grey;
+		}
+    </style>
+	<body>
+	   <div id = "content">
+	     <span id = "changeday"></span>
+	     <span id = "changemonth"></span>
+	     <span id = "changeyear"></span>
+	     <div id = "left" style = "background-image:url('C:/images/arrowleft.jfif');"></div>
+	     <div id = "right" style = "background-image:url('C:/images/arrowright.jfif');"></div>
+		 <div id = "tasklist"></div>
+		 <span id = "tasklisttext">список задач</span>
+		 <span id = "tasklistday"></span>
+	     <span id = "tasklistmonth"></span>
+	     <span id = "tasklistyear"></span>
+	   </div>
+	</body>
+	<script>
+	    function soundClick(){
+		  let audio = new Audio();
+		  audio.src = 'C:/sounds/perd.mp3';
+		  audio.autoplay = true;
+		}
+	    function showDay(day){
+		  let days = ['вс','пн','вт','ср','чт','пт','сб'];
+		  return days[day];
+		}
+		function holidays(reddays){
+		  for (let x = 5; x < reddays.length; x = x + 7){
+		     reddays[x].style.color = 'red';
+			 reddays[x + 1].style.color = 'red';
+		  }
+		}
+	    let changeday = document.getElementById('changeday');
+	    let changemonth = document.getElementById('changemonth');
+		let changeyear = document.getElementById('changeyear');
+		let tasklistday = document.getElementById('tasklistday');
+	    let tasklistmonth = document.getElementById('tasklistmonth');
+		let tasklistyear = document.getElementById('tasklistyear');
+		let tasklist = document.getElementById('tasklist');
+		let taskpunkts = document.getElementsByTagName('li');
+		let content = document.getElementById('content');
+		let left = document.getElementById('left');
+		let right = document.getElementById('right');
+		let months = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+		let table = document.createElement('table');
+		changeday.appendChild(table);
+		let date = new Date();
+		let day = date.getDate();
+		let month = date.getMonth();
+		let year = date.getFullYear();
+		let i = month;
+		let k = year;
+		let taskPunktIndex;
+		let masstasklistIndex;
+		/*let s = 0;
+		let u = 0;
+		let v = 0;*/
+		let columns = document.getElementsByTagName('td');
+		let firstDay = new Date(year,i + 1).getDate();
+		let lastDay = new Date(year,i + 1,0).getDate();
+		let lastDayMonth = new Date(year,month + 1,0);
+		let lastday = lastDayMonth.getDate();
+		let lastdayweek = lastDayMonth.getDay();
+		let firstdaymonth = new Date(year,month,1);
+		let firstday = firstdaymonth.getDate();
+		let firstdayweek = firstdaymonth.getDay();
+		let monday = 1;
+		let manyday = firstdayweek - monday;
+		let sunday = 7;
+		let lastmanyday = sunday - lastdayweek;
+		if (lastdayweek == 0){
+		  lastmanyday = 0;
+		}
+		if (firstdayweek == 0){
+		  manyday = 0;
+		}
+		
+		let rowday = document.getElementsByTagName('th');
+		let rows = document.getElementsByTagName('tr');
+		let prevarr = [];
+		let nowarr = [];
+		let nextarr = [];
+		let surplusarr = [];
+		let masstasklist = [];
+		let daytr = document.createElement('tr');
+		table.appendChild(daytr);
+		for (let d = 0; d < 7; d++){
+		  let th = document.createElement('th');
+		    th.innerHTML = showDay(d + 1);
+		  if (d == 6){
+		    th.innerHTML = showDay(0);
+		  }
+		  daytr.appendChild(th);
+		}
+		
+		for (let c = 0; c < 6; c++){
+		   let tr = document.createElement('tr');
+		     for (let y = 0; y < 7; y++){
+			   let td = document.createElement('td');
+		        td.innerHTML = ' ';     
+			   tr.appendChild(td);
+			 }
+			 table.appendChild(tr);
+		    }
+		holidays(columns);
+		for (let z = -manyday + 1; z <= 0; z++){
+		     let prevdays = new Date(year,month,z);
+			 prevarr.push(prevdays.getDate());
+		   }
+		   for (let g = 0; g < prevarr.length; g++){
+		      columns[g].innerHTML = prevarr[g];
+		   }
+		   for (let j = firstday; j <= lastday; j++){
+		   let days = new Date(year,month,j);
+		   nowarr.push(days.getDate());
+		  }
+		  for (let e = prevarr.length; e < nowarr.length + prevarr.length; e++){
+		     columns[e].innerHTML = nowarr[e - prevarr.length];
+			 if (e == date.getDate() && i == date.getMonth() && k == date.getFullYear()){
+			    columns[e + prevarr.length - 1].style.color = 'green';
+			  }
+		   }
+		  for (let n = 1; n <= lastmanyday; n++){
+		     let nextdays = new Date(year,month + 1,n);
+		     nextarr.push(nextdays.getDate());
+		  }
+		  for (let f = prevarr.length + nowarr.length; f < prevarr.length + nowarr.length + nextarr.length; f++){
+		    columns[f].innerHTML = nextarr[f - prevarr.length - nowarr.length];
+		  }
+		  for (let r = lastmanyday + 1; r < columns.length - prevarr.length - nowarr.length - nextarr.length + lastmanyday + 1; r++){
+		    let surplusdays = new Date(year,month + 1,r);
+		    surplusarr.push(surplusdays.getDate())
+		  }
+		  for (let q = prevarr.length + nowarr.length + nextarr.length; q < columns.length; q++){
+		    columns[q].innerHTML = surplusarr[q - prevarr.length - nowarr.length - nextarr.length];
+		  }
+		 
+		changemonth.innerHTML = months[month];
+		changeyear.innerHTML = year;
+		function addOrganaizer(){
+		   soundClick();
+		   tasklistday.innerHTML = this.innerHTML;
+		   tasklistmonth.innerHTML = months[new Date(year,i).getMonth()];
+		   tasklistyear.innerHTML = new Date(k,month).getFullYear();
+		   tasklist.innerHTML = '';
+		   console.log(masstasklist);
+		   if (masstasklist.length == 0){
+		   let checklist = document.createElement('ul');
+           let addcheck = document.createElement('input');
+		   addcheck.type = "text";
+		   addcheck.placeholder = "добавьте задачу";
+		   tasklist.appendChild(checklist);
+		   tasklist.appendChild(addcheck);
+           addcheck.addEventListener('blur',function(){
+		   let li = document.createElement('li');
+		   let redactSpan = document.createElement('span');
+		   redactSpan.innerHTML = this.value;
+		   this.value = '';
+		   checklist.appendChild(li);
+		   masstasklist.push({
+			 nowday:tasklistday.innerHTML,
+			 nowmonth:tasklistmonth.innerHTML,
+			 nowyear:tasklistyear.innerHTML,
+			 checklistdone:[],
+			 objectivelist:[],
+		   });
+		   masstasklist[0]['objectivelist'].push(redactSpan.innerHTML);
+		   if (masstasklist.length > 1){
+		     masstasklist.pop();
+		   }
+		   li.appendChild(redactSpan);
+		   li.addEventListener('click',function func(e){
+		     let taskpunkt = e.target;
+			 for (let h = 0; h < taskpunkts.length; h++){
+                taskPunktIndex = h;			 
+			    if (taskpunkts[h] === taskpunkt){
+				  break;
+				}
+			 }
+		     let input = document.createElement('input');
+			 input.value = redactSpan.innerHTML;
+			 redactSpan.innerHTML = '';
+			 this.appendChild(input);
+			 input.addEventListener('keydown',function(e){
+			   if (e.keyCode === 13){
+			     redactSpan.innerHTML = this.value;
+				 masstasklist[0].objectivelist[taskPunktIndex] = this.value;
+				 console.log(masstasklist);
+			     redactSpan.addEventListener('click',func);
+				 li.removeChild(this);
+				 }
+			 });
+			 this.removeEventListener('click',func);
+		   });
+		   let checkbox = document.createElement('input');
+		   checkbox.type = "checkbox";
+		   li.appendChild(checkbox);
+		   checkbox.addEventListener('click',function(e){
+		      let taskpunkt = e.target;
+		      for (let h = 0; h < taskpunkts.length; h++){
+                let taskPunktIndex = h;			 
+			    if (taskpunkts[h] === taskpunkt.parentElement){
+				  break;
+				}
+			  }
+		      li.classList.add('done');
+			  masstasklist[0].checklistdone.push(taskpunkt.previousElementSibling.innerHTML);
+			  li.removeChild(this); 
+			  e.stopPropagation();
+		   });
+		   let button = document.createElement('button');
+		   button.innerHTML = 'x';
+		   li.appendChild(button);
+		   button.addEventListener('click',function(e){
+		     let taskpunkt = e.target;
+		     for (let h = 0; h < taskpunkts.length; h++){
+                taskPunktIndex = h;			 
+			    if (taskpunkts[h] === taskpunkt.parentElement){
+				  break;
+				}
+			 }
+		     if (masstasklist[0].checklistdone.length != 0){
+				  for (let o = 0; o < masstasklist[0].checklistdone.length; o++){
+				    if (masstasklist[0].checklistdone[o] == masstasklist[0].objectivelist[taskPunktIndex]){
+					   masstasklist[0].checklistdone.splice(o,1);
+					}
+				  }
+			 }
+		     masstasklist[0].objectivelist.splice(taskPunktIndex,1);
+		     checklist.removeChild(li);
+			 console.log(masstasklist);
+			 console.log(taskPunktIndex);
+			 e.stopPropagation();
+		   });
+		});
+		  } else {
+		   for (let h = 0; h < masstasklist.length; h++){
+		   if (masstasklist[h].nowday == tasklistday.innerHTML && masstasklist[h].nowmonth == tasklistmonth.innerHTML && masstasklist[h].nowyear == tasklistyear.innerHTML){
+		   console.log(h);
+		   tasklist.innerHTML = ''; 
+		   let checklist = document.createElement('ul');
+           let addcheck = document.createElement('input');
+		   addcheck.type = "text";
+		   addcheck.placeholder = "добавьте задачу";
+		   tasklist.appendChild(checklist);
+		   tasklist.appendChild(addcheck);
+		   for (let o = 0; o < masstasklist[h].objectivelist.length; o++){
+		      let li = document.createElement('li');
+		      let redactSpan = document.createElement('span');
+			  redactSpan.innerHTML = masstasklist[h].objectivelist[o];
+			  if (masstasklist[h].checklistdone.length != 0){
+				  for (let er = 0; er < masstasklist[h].checklistdone.length; er++){
+				    if (masstasklist[h].checklistdone[er] == masstasklist[h].objectivelist[o]){
+					   li.classList.add('done'); 
+					}
+				  }
+			 }
+			  checklist.appendChild(li);
+			  li.appendChild(redactSpan);
+			  
+			  li.addEventListener('click',function func(e){
+			  let taskpunkt = e.target;
+			  for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt){
+				  break;
+				}
+			 }
+		     let input = document.createElement('input');
+			 input.value = redactSpan.innerHTML;
+			 redactSpan.innerHTML = '';
+			 this.appendChild(input);
+			 input.addEventListener('keydown',function(e){
+			   if (e.keyCode === 13){
+			     redactSpan.innerHTML = this.value;
+				 masstasklist[h].objectivelist[taskPunktIndex] = this.value;
+			     redactSpan.addEventListener('click',func);
+				 li.removeChild(this);
+				 }
+			 });
+			 this.removeEventListener('click',func);
+		   });
+		   let checkbox = document.createElement('input');
+		   checkbox.type = "checkbox";
+		   li.appendChild(checkbox);
+		   checkbox.addEventListener('click',function(e){
+		      let taskpunkt = e.target;
+		      for (let ar = 0; ar < taskpunkts.length; ar++){
+                 taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			  }
+		      li.classList.add('done');
+			  masstasklist[h].checklistdone.push(taskpunkt.previousElementSibling.innerHTML);
+			  li.removeChild(this);
+			  e.stopPropagation();
+		   });
+		   let button = document.createElement('button');
+		   button.innerHTML = 'x';
+		   li.appendChild(button);
+		   button.addEventListener('click',function(e){
+		     let taskpunkt = e.target;
+		     for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			 }
+			 if (masstasklist[h].checklistdone.length != 0){
+				  for (let o = 0; o < masstasklist[h].checklistdone.length; o++){
+				    if (masstasklist[h].checklistdone[o] == masstasklist[h].objectivelist[taskPunktIndex]){
+					   masstasklist[h].checklistdone.splice(o,1);
+					}
+				  }
+			 }
+		     masstasklist[h].objectivelist.splice(taskPunktIndex,1);
+		     checklist.removeChild(li);
+			 console.log(masstasklist);
+			 console.log(taskPunktIndex);
+			 e.stopPropagation();
+		   });
+		   
+		   }
+           addcheck.addEventListener('blur',function(){
+		   let li = document.createElement('li');
+		   let redactSpan = document.createElement('span');
+		   redactSpan.innerHTML = this.value;
+		   this.value = '';
+		   checklist.appendChild(li);
+		   masstasklist[h]['objectivelist'].push(redactSpan.innerHTML);
+		   li.appendChild(redactSpan);
+		   li.addEventListener('click',function func(e){
+		     let taskpunkt = e.target;
+			  for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt){
+				  break;
+				}
+			 }
+		     let input = document.createElement('input');
+			 input.value = redactSpan.innerHTML;
+			 redactSpan.innerHTML = '';
+			 this.appendChild(input);
+			 input.addEventListener('keydown',function(e){
+			   if (e.keyCode === 13){
+			     redactSpan.innerHTML = this.value;
+				 masstasklist[h].objectivelist[taskPunktIndex] = this.value;
+			     redactSpan.addEventListener('click',func);
+				 li.removeChild(this);
+				 }
+			 });
+			 this.removeEventListener('click',func);
+		   });
+		   let checkbox = document.createElement('input');
+		   checkbox.type = "checkbox";
+		   li.appendChild(checkbox);
+		   checkbox.addEventListener('click',function(e){
+		      let taskpunkt = e.target;
+		      for (let ar = 0; ar < taskpunkts.length; ar++){
+                let taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			  }
+		      li.classList.add('done');
+			  masstasklist[h].checklistdone.push(taskpunkt.previousElementSibling.innerHTML);
+			  li.removeChild(this);
+			  e.stopPropagation();
+		   });
+		   let button = document.createElement('button');
+		   button.innerHTML = 'x';
+		   li.appendChild(button);
+		   button.addEventListener('click',function(e){
+		     let taskpunkt = e.target;
+		     for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			 }
+			 if (masstasklist[h].checklistdone.length != 0){
+				  for (let o = 0; o < masstasklist[h].checklistdone.length; o++){
+				    if (masstasklist[h].checklistdone[o] == masstasklist[h].objectivelist[taskPunktIndex]){
+					   masstasklist[h].checklistdone.splice(o,1);
+					}
+				  }
+			 }
+		     masstasklist[h].objectivelist.splice(taskPunktIndex,1);
+		     checklist.removeChild(li);
+			 console.log(masstasklist);
+			 console.log(taskPunktIndex);
+			 e.stopPropagation();
+		   });
+		});
+		   break;
+		  } else {
+		   tasklist.innerHTML = '';
+		   let checklist = document.createElement('ul');
+           let addcheck = document.createElement('input');
+		   addcheck.type = "text";
+		   addcheck.placeholder = "добавьте задачу";
+		   tasklist.appendChild(checklist);
+		   tasklist.appendChild(addcheck);
+           addcheck.addEventListener('blur',function(){
+		   let li = document.createElement('li');
+		   let redactSpan = document.createElement('span');
+		   redactSpan.innerHTML = this.value;
+		   this.value = '';
+		   checklist.appendChild(li);
+		   masstasklist.push({
+			 nowday:tasklistday.innerHTML,
+			 nowmonth:tasklistmonth.innerHTML,
+			 nowyear:tasklistyear.innerHTML,
+			 checklistdone:[],
+			 objectivelist:[],
+		   });
+		   if (masstasklist[masstasklist.length - 1].nowday == masstasklist[masstasklist.length - 2].nowday){
+		     masstasklist.pop();
+		   }
+		   masstasklist[masstasklist.length - 1]['objectivelist'].push(redactSpan.innerHTML);
+		   li.appendChild(redactSpan);
+		   li.addEventListener('click',function func(e){
+		     let taskpunkt = e.target;
+			 for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt){
+				  break;
+				}
+			 }
+		     let input = document.createElement('input');
+			 input.value = redactSpan.innerHTML;
+			 redactSpan.innerHTML = '';
+			 this.appendChild(input);
+			 input.addEventListener('keydown',function(e){
+			   if (e.keyCode === 13){
+			     redactSpan.innerHTML = this.value;
+				 masstasklist[masstasklist.length - 1].objectivelist[taskPunktIndex] = this.value;
+			     redactSpan.addEventListener('click',func);
+				 li.removeChild(this);
+				 console.log(masstasklist);
+				 }
+			 });
+			 this.removeEventListener('click',func);
+		   });
+		   let checkbox = document.createElement('input');
+		   checkbox.type = "checkbox";
+		   li.appendChild(checkbox);
+		   checkbox.addEventListener('click',function(e){
+		      let taskpunkt = e.target;
+		      for (let ar = 0; ar < taskpunkts.length; ar++){
+                let taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			  }
+		      li.classList.add('done');
+			  masstasklist[masstasklist.length - 1].checklistdone.push(taskpunkt.previousElementSibling.innerHTML);
+			  li.removeChild(this);
+			  e.stopPropagation();
+		   });
+		   let button = document.createElement('button');
+		   button.innerHTML = 'x';
+		   li.appendChild(button);
+		   button.addEventListener('click',function(e){
+		     let taskpunkt = e.target;
+		     for (let ar = 0; ar < taskpunkts.length; ar++){
+                taskPunktIndex = ar;			 
+			    if (taskpunkts[ar] === taskpunkt.parentElement){
+				  break;
+				}
+			 }
+		     if (masstasklist[masstasklist.length - 1].checklistdone.length != 0){
+				  for (let o = 0; o < masstasklist[masstasklist.length - 1].checklistdone.length; o++){
+				    if (masstasklist[masstasklist.length - 1].checklistdone[o] == masstasklist[masstasklist.length - 1].objectivelist[taskPunktIndex]){
+					   masstasklist[masstasklist.length - 1].checklistdone.splice(o,1);
+					}
+				  }
+			 }
+		     masstasklist[masstasklist.length - 1].objectivelist.splice(taskPunktIndex,1);
+		     checklist.removeChild(li);
+			 console.log(masstasklist);
+			 console.log(taskPunktIndex);
+			 e.stopPropagation();
+		   });
+		});
+		  }
+          }		
+		  }
+		  }
+		function Organaizer(){
+		   let u = nextarr.length;
+		   let v = surplusarr.length;
+		   let w = columns.length - u - v;
+		   console.log(prevarr.length);
+		   console.log(nowarr);
+		   for (let com = 0; com < columns.length; com++){
+		     columns[com].style.backgroundColor = 'white';
+			 columns[com].removeEventListener('click',addOrganaizer);
+		   }
+		   for (let s = prevarr.length; s < w; s++){
+		    
+		    columns[s].addEventListener('click',addOrganaizer); 
+		}
+		}
+		Organaizer();
+		left.onclick = function(){
+		   for (let c = 0; c < columns.length; c++){
+		     columns[c].innerHTML = ' ';
+			 columns[c].style.color = 'black';
+		   }
+		   holidays(columns);
+		   i--;
+		   changemonth.innerHTML = months[new Date(year,i).getMonth()];
+		   let firstDayInMonth = new Date(year,i,1);
+		   let lastDayInMonth = new Date(year,i + 1,0);
+		   let getfirstdaymomth = firstDayInMonth.getDate();
+		   let getlastdaymomth = lastDayInMonth.getDate();
+		   prevarr = [];
+		   nowarr = [];
+		   nextarr = [];
+		   surplusarr = [];
+		   firstdayweek = firstDayInMonth.getDay();
+		   manyday = firstdayweek - monday;
+		   lastdayweek = lastDayInMonth.getDay();
+		   lastmanyday = sunday - lastdayweek;		   
+		   if (lastdayweek == 0){
+		     lastmanyday = 0;
+		   }
+		   if (firstdayweek == 0){
+		     manyday = 0;
+		   }
+		   for (let z = -manyday + 1; z <= 0; z++){
+		     let prevdays = new Date(year,i,z);
+			 prevarr.push(prevdays.getDate());
+		   }
+		   for (let g = 0; g < prevarr.length; g++){
+		      columns[g].innerHTML = prevarr[g];
+		   }
+		   for (let e = getfirstdaymomth; e <= getlastdaymomth; e++){
+		      let nowdays = new Date(year,i,e);
+		      nowarr.push(nowdays.getDate());
+		      }
+			  for (let j = prevarr.length; j < nowarr.length + prevarr.length; j++){
+		      columns[j].innerHTML = nowarr[j - prevarr.length];
+			  if (j == date.getDate() && i == date.getMonth() && k == date.getFullYear()){
+			    columns[j + prevarr.length - 1].style.color = 'green';
+			  }
+		      }
+			for (let n = 1; n <= lastmanyday; n++){
+		     let nextdays = new Date(year,i,n);
+		     nextarr.push(nextdays.getDate());
+		    }
+		    for (let f = prevarr.length + nowarr.length; f < columns.length; f++){
+		    columns[f].innerHTML = nextarr[f - prevarr.length - nowarr.length];
+		    }
+			for (let r = lastmanyday + 1; r < columns.length - prevarr.length - nowarr.length - nextarr.length + lastmanyday + 1; r++){
+		    let surplusdays = new Date(year,i,r);
+		    surplusarr.push(surplusdays.getDate())
+		    }
+		    for (let q = prevarr.length + nowarr.length + nextarr.length; q < columns.length; q++){
+		    columns[q].innerHTML = surplusarr[q - prevarr.length - nowarr.length - nextarr.length];
+		    }
+		   if (i == -1){
+		      i = 11;
+		      k--;
+			  changemonth.innerHTML = months[new Date(year,i).getMonth()];
+		      changeyear.innerHTML = new Date(k,month).getFullYear();
+		   }
+		   Organaizer();
+		}
+		right.onclick = function(){
+		   for (let c = 0; c < columns.length; c++){
+		     columns[c].innerHTML = ' ';
+			 columns[c].style.color = 'black';
+		   }
+		   holidays(columns);
+		   i++;
+		   changemonth.innerHTML = months[new Date(year,i).getMonth()];
+		   let firstDayInMonth = new Date(year,i,1);
+		   let lastDayInMonth = new Date(year,i + 1,0);
+		   let getfirstdaymomth = firstDayInMonth.getDate();
+		   let getlastdaymomth = lastDayInMonth.getDate();
+		   prevarr = [];
+		   nowarr = [];
+		   nextarr = [];
+		   surplusarr = [];
+		   firstdayweek = firstDayInMonth.getDay();
+		   manyday = firstdayweek - monday;
+		   lastdayweek = lastDayInMonth.getDay();
+		   lastmanyday = sunday - lastdayweek;		   
+		   if (lastdayweek == 0){
+		     lastmanyday = 0;
+		   }
+		   if (firstdayweek == 0){
+		     manyday = 0;
+		   }
+		   for (let z = -manyday + 1; z <= 0; z++){
+		     let prevdays = new Date(year,i,z);
+			 prevarr.push(prevdays.getDate());
+		   }
+		   for (let g = 0; g < prevarr.length; g++){
+		      columns[g].innerHTML = prevarr[g];
+		   }
+		   for (let e = getfirstdaymomth; e <= getlastdaymomth; e++){
+		      let nowdays = new Date(year,i,e);
+		      nowarr.push(nowdays.getDate());
+		      }
+			  for (let j = prevarr.length; j < nowarr.length + prevarr.length; j++){
+		      columns[j].innerHTML = nowarr[j - prevarr.length];
+			  if (j == date.getDate() && i == date.getMonth() && k == date.getFullYear()){
+			    columns[j + prevarr.length - 1].style.color = 'green';
+			  }
+		      }
+			for (let n = 1; n <= lastmanyday; n++){
+		     let nextdays = new Date(year,i,n);
+		     nextarr.push(nextdays.getDate());
+		    }
+		    for (let f = prevarr.length + nowarr.length; f < columns.length; f++){
+		    columns[f].innerHTML = nextarr[f - prevarr.length - nowarr.length];
+		    }
+			for (let r = lastmanyday + 1; r < columns.length - prevarr.length - nowarr.length - nextarr.length + lastmanyday + 1; r++){
+		    let surplusdays = new Date(year,i,r);
+		    surplusarr.push(surplusdays.getDate())
+		    }
+		    for (let q = prevarr.length + nowarr.length + nextarr.length; q < columns.length; q++){
+		    columns[q].innerHTML = surplusarr[q - prevarr.length - nowarr.length - nextarr.length];
+		    }
+		   if (i == 12){
+		      i = 0;
+		      k++;
+			  changemonth.innerHTML = months[new Date(year,i).getMonth()];
+		      changeyear.innerHTML = new Date(k,month).getFullYear();
+		   }
+		   Organaizer(); 
+		}
+		
+		// Органайзер
+		
+		/*for (s = prevarr.length; s < columns.length - nextarr.length - surplusarr.length; s++){
+		  columns[s].onclick = function(){
+		    soundClick();
+		    tasklist.innerHTML = this.innerHTML;
+			tasklistday.innerHTML = this.innerHTML;
+			tasklistmonth.innerHTML = months[new Date(year,i).getMonth()];
+			tasklistyear.innerHTML = new Date(k,month).getFullYear();
+			console.log(i);
+			console.log(prevarr);
+			console.log(s);
+			if (columns[s].innerHTML == prevarr[s] && s < prevarr.length){
+			  prevmonth = i;
+			  tasklistmonth.innerHTML = months[new Date(year,prevmonth).getMonth()];
+			}
+			if (s => columns.length - nextarr.length - surplusarr.length){
+			  nextmonth = i;
+			  tasklistmonth.innerHTML = months[new Date(year,nextmonth).getMonth()];  
+			}
+			
+		  }
+		}*/
+		/* редактирование списка задач
+		let checklist = document.getElementById('checklist');
+        let addcheck = document.getElementById('addcheck');
+        addcheck.addEventListener('blur',function(){
+		   let li = document.createElement('li');
+		   let redactSpan = document.createElement('span');
+		   redactSpan.innerHTML = this.value;
+		   this.value = '';
+		   checklist.appendChild(li);
+		   li.appendChild(redactSpan);
+		   li.addEventListener('click',function func(){
+		     let input = document.createElement('input');
+			 input.value = redactSpan.innerHTML;
+			 redactSpan.innerHTML = '';
+			 this.appendChild(input);
+			 input.addEventListener('keydown',function(e){
+			   if (e.keyCode === 13){
+			     redactSpan.innerHTML = this.value;
+			     redactSpan.addEventListener('click',func);
+				 li.removeChild(this);
+				 }
+			 });
+			 this.removeEventListener('click',func);
+		   });
+		   let checkbox = document.createElement('input');
+		   checkbox.type = "checkbox";
+		   li.appendChild(checkbox);
+		   checkbox.addEventListener('click',function(){
+		      li.classList.add('done');
+			  li.removeChild(this);
+		   });
+		   let button = document.createElement('button');
+		   button.innerHTML = 'x';
+		   li.appendChild(button);
+		   button.addEventListener('click',function(){
+		     checklist.removeChild(li);
+		   });
+		});*/	
+    </script>
+</html>
